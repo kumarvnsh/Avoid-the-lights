@@ -24,6 +24,14 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
+    public void OnBackButtonClick()
+    {
+        if (levelSelectionPanel != null)
+        {
+            levelSelectionPanel.SetActive(false); // Show the level selection panel
+        }
+    }
+
     // Function to handle level selection
     public void LoadLevel(string sceneName)
     {
