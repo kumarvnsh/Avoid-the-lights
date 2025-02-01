@@ -1,24 +1,24 @@
 using UnityEngine;
-using UnityEngine.UI; // Required for UI elements
-
+using UnityEngine.UI;
+using System.Collections;
 public class Player : GameEntity
 {
     [SerializeField] private float speed = 5f;
     [SerializeField] private int health = 100;
-    [SerializeField] private Image healthBarImage; // Reference to the health bar UI Image
+    [SerializeField] private Image healthBarImage;
 
     private Rigidbody2D rb;
     private Vector2 movement;
     private Camera mainCamera;
     private float initialSpeed;
-    private bool isSpeedBoostActive = false; // Flag to track speed boost state
+    private bool isSpeedBoostActive = false;
 
     private void Start()
     {
         initialSpeed = speed;
         rb = GetComponent<Rigidbody2D>();
-        mainCamera = Camera.main; // Reference to the main camera
-        UpdateHealthBar(); // Initialize health bar
+        mainCamera = Camera.main;
+        UpdateHealthBar();
     }
 
     private void Update()
@@ -28,11 +28,6 @@ public class Player : GameEntity
 
     private void FixedUpdate()
     {
-        if (health <= 0)
-        {
-            GameManager.Instance.GameOver();
-            return;
-        }
         Move();
         ConstrainToScreen();
     }
@@ -53,55 +48,59 @@ public class Player : GameEntity
         Vector3 position = transform.position;
         Vector3 screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
 
-        // Clamp position to the camera's visible area
         position.x = Mathf.Clamp(position.x, -screenBounds.x + 0.5f, screenBounds.x - 0.5f);
         position.y = Mathf.Clamp(position.y, -screenBounds.y + 0.5f, screenBounds.y - 2);
 
         transform.position = position;
     }
 
-    public override void UpdateState()
+    public override void UpdateState() { }
+
+    public void TakeDamage(int damage)
     {
+        health -= damage;
+        health = Mathf.Clamp(health, 0, 100);
+        UpdateHealthBar();
+
         if (health <= 0)
         {
             GameManager.Instance.GameOver();
         }
     }
 
-    public void TakeDamage(int damage)
-    {
-        health -= damage;
-        health = Mathf.Clamp(health, 0, 100); // Prevent health from going below 0
-        UpdateHealthBar();
-    }
-
     public void Heal(int amount)
     {
         health += amount;
-        health = Mathf.Clamp(health, 0, 100); // Prevent health from exceeding max
+        health = Mathf.Clamp(health, 0, 100);
         UpdateHealthBar();
     }
 
     public void BoostSpeed(float multiplier, float duration)
     {
-        if (isSpeedBoostActive) return; // Do not apply boost if already active
+        if (isSpeedBoostActive) return;
 
         isSpeedBoostActive = true;
         speed *= multiplier;
-        Invoke(nameof(ResetSpeed), duration);
+        StartCoroutine(ResetSpeedAfterDelay(duration));
+    }
+
+    private IEnumerator ResetSpeedAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        ResetSpeed();
     }
 
     private void ResetSpeed()
     {
-        speed = initialSpeed; // Reset to default speed
-        isSpeedBoostActive = false; // Reset the flag
+        speed = initialSpeed;
+        isSpeedBoostActive = false;
     }
 
     private void UpdateHealthBar()
     {
         if (healthBarImage != null)
         {
-            healthBarImage.fillAmount = health / 100f; // Scale health (0-100) to 0-1 for Image fill
+            healthBarImage.fillAmount = health / 100f;
         }
     }
 }

@@ -1,10 +1,12 @@
 using UnityEngine;
 
+public enum PowerUpType { Heal, SpeedBoost }
+
 public class PowerUp : MonoBehaviour
 {
-    [SerializeField] private string effect; // "Heal" or "SpeedBoost"
-    [SerializeField] private int value = 20; // Heal amount or SpeedBoost multiplier
-    [SerializeField] private float duration = 5f; // Duration for SpeedBoost
+    [SerializeField] private PowerUpType effect;
+    [SerializeField] private int value = 20;
+    [SerializeField] private float duration = 5f;
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -23,14 +25,11 @@ public class PowerUp : MonoBehaviour
     {
         switch (effect)
         {
-            case "Heal":
+            case PowerUpType.Heal:
                 player.Heal(value);
                 break;
-            case "SpeedBoost":
+            case PowerUpType.SpeedBoost:
                 player.BoostSpeed(value, duration);
-                break;
-            default:
-                Debug.LogWarning($"Effect {effect} not recognized!");
                 break;
         }
     }

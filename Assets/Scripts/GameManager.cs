@@ -1,17 +1,18 @@
 using UnityEngine;
-using UnityEngine.UI; // Required for UI elements
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [SerializeField] private float survivalTime = 30f; // Time player needs to survive
+    [SerializeField] private float survivalTime = 30f;
     private float timer;
     private bool isGameOver;
+    public bool IsGamePaused { get; private set; } = false;
 
     [SerializeField] private GameObject gameOverUI;
     [SerializeField] private GameObject gameWinUI;
-    [SerializeField] private Image timerImage; // Reference to the timer UI Image
+    [SerializeField] private Image timerImage;
 
     private void Awake()
     {
@@ -25,8 +26,6 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    
-
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
@@ -34,11 +33,9 @@ public class GameManager : MonoBehaviour
             PauseGame();
         }
 
-        if (!isGameOver)
+        if (!isGameOver && !IsGamePaused)
         {
             timer += Time.deltaTime;
-
-            // Update the timer image fill
             UpdateTimerImage();
 
             if (timer >= survivalTime)
@@ -70,14 +67,21 @@ public class GameManager : MonoBehaviour
 
     public void PauseGame()
     {
-        Time.timeScale = Time.timeScale == 0 ? 1 : 0;
+        IsGamePaused = !IsGamePaused;
+        Time.timeScale = IsGamePaused ? 0 : 1;
+    }
+
+    public void ResumeGame()
+    {
+        IsGamePaused = false;
+        Time.timeScale = 1;
     }
 
     private void UpdateTimerImage()
     {
         if (timerImage != null)
         {
-            timerImage.fillAmount = 1 - (timer / survivalTime); // Scale timer to fill amount
+            timerImage.fillAmount = 1 - (timer / survivalTime);
         }
     }
 }

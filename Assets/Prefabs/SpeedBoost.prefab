@@ -133,6 +133,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61b957255045edc4ea47b2b3d9e1132c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effect: SpeedBoost
+  effect: 1
   value: 2
   duration: 5
