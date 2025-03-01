@@ -253,8 +253,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 911071144}
-  moveSpeed: 120
-  alphaChangeSpeed: 5
+  moveSpeed: 100
+  alphaChangeSpeed: 2
 --- !u!114 &28881790
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1679,8 +1679,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 911071144}
-  moveSpeed: 120
-  alphaChangeSpeed: 5
+  moveSpeed: 100
+  alphaChangeSpeed: 2
 --- !u!1 &1872604307
 GameObject:
   m_ObjectHideFlags: 0
@@ -1998,8 +1998,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canvas: {fileID: 911071144}
-  moveSpeed: 120
-  alphaChangeSpeed: 5
+  moveSpeed: 100
+  alphaChangeSpeed: 2
 --- !u!114 &1932783303
 MonoBehaviour:
   m_ObjectHideFlags: 0
