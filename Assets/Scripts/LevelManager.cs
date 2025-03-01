@@ -1,7 +1,10 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using System.Collections;
 
+/// <summary>
+/// Handles spawning of lights and power-ups in the level.
+/// </summary>
 public class LevelManager : MonoBehaviour
 {
     [Header("Light Settings")]
@@ -11,22 +14,23 @@ public class LevelManager : MonoBehaviour
     [SerializeField] private Vector2 lightSpawnRangeY;
 
     [Header("Power-Up Settings")]
-    [SerializeField] private List<GameObject> powerUpPrefabs; // List of power-up prefabs
-    [SerializeField] private int initialPowerUpCount = 3; // Number of power-ups to spawn initially
+    [SerializeField] private List<GameObject> powerUpPrefabs;
+    [SerializeField] private int initialPowerUpCount = 3;
     [SerializeField] private Vector2 powerUpSpawnRangeX;
     [SerializeField] private Vector2 powerUpSpawnRangeY;
-    [SerializeField] private float powerUpSpawnInterval = 10f; // Time between power-up spawns
+    [SerializeField] private float powerUpSpawnInterval = 10f;
 
     private List<GameObject> activeLights = new List<GameObject>();
     private List<GameObject> activePowerUps = new List<GameObject>();
-
-    private bool isSpawningPowerUps = true; // Controls the coroutine execution
+    private bool isSpawningPowerUps = true;
 
     private void Start()
     {
+        // Spawn initial lights and power-ups
         SpawnLights();
         SpawnInitialPowerUps();
-        //InvokeRepeating(nameof(SpawnPowerUp), powerUpSpawnInterval, powerUpSpawnInterval);
+
+        // Start coroutine to spawn power-ups at intervals
         StartCoroutine(SpawnPowerUpRoutine());
     }
 
@@ -39,20 +43,26 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawns the specified number of lights in random positions.
+    /// </summary>
     private void SpawnLights()
     {
         for (int i = 0; i < lightCount; i++)
         {
-            Vector2 spawnPosition = new Vector2(
+            Vector2 spawnPos = new Vector2(
                 Random.Range(lightSpawnRangeX.x, lightSpawnRangeX.y),
                 Random.Range(lightSpawnRangeY.x, lightSpawnRangeY.y)
             );
 
-            GameObject light = Instantiate(lightPrefab, spawnPosition, Quaternion.identity);
-            activeLights.Add(light);
+            GameObject lightObj = Instantiate(lightPrefab, spawnPos, Quaternion.identity);
+            activeLights.Add(lightObj);
         }
     }
 
+    /// <summary>
+    /// Spawns the initial set of power-ups.
+    /// </summary>
     private void SpawnInitialPowerUps()
     {
         for (int i = 0; i < initialPowerUpCount; i++)
@@ -61,18 +71,21 @@ public class LevelManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Spawns a random power-up from the powerUpPrefabs list.
+    /// </summary>
     private void SpawnPowerUp()
     {
         if (powerUpPrefabs.Count == 0) return;
 
         GameObject randomPowerUp = powerUpPrefabs[Random.Range(0, powerUpPrefabs.Count)];
-
-        Vector2 spawnPosition = new Vector2(
+        Vector2 spawnPos = new Vector2(
             Random.Range(powerUpSpawnRangeX.x, powerUpSpawnRangeX.y),
             Random.Range(powerUpSpawnRangeY.x, powerUpSpawnRangeY.y)
         );
 
-        Instantiate(randomPowerUp, spawnPosition, Quaternion.identity);
+        GameObject powerUpObj = Instantiate(randomPowerUp, spawnPos, Quaternion.identity);
+        activePowerUps.Add(powerUpObj);
     }
 
     private void Update()

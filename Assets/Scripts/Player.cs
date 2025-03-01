@@ -1,66 +1,106 @@
 using UnityEngine;
-using UnityEngine.UI;
 using System.Collections;
-public class Player : GameEntity
+
+/// <summary>
+/// The Player class manages the player character.
+/// It implements IMovable, IDamageable, and IPowerUpReceiver
+/// to separate responsibilities.
+/// </summary>
+[RequireComponent(typeof(Rigidbody2D))]
+public class Player : GameEntity, IMovable, IDamageable, IPowerUpReceiver
 {
+    [Header("Player Configuration")]
     [SerializeField] private float speed = 5f;
     [SerializeField] private int health = 100;
-    [SerializeField] private Image healthBarImage;
+
+    [Header("UI References")]
+    [SerializeField] private PlayerUI playerUI;
+
+    [Header("Canvas Constraint")]
+    [SerializeField] private Canvas gameCanvas; 
+    private RectTransform canvasRect;
+
+    public float Speed
+    {
+        get => speed;
+        set => speed = value;
+    }
 
     private Rigidbody2D rb;
     private Vector2 movement;
-    private Camera mainCamera;
-    private float initialSpeed;
-    private bool isSpeedBoostActive = false;
+    private int maxHealth = 100;
 
     private void Start()
     {
-        initialSpeed = speed;
         rb = GetComponent<Rigidbody2D>();
-        mainCamera = Camera.main;
-        UpdateHealthBar();
+        // Initialize UI display with current health
+        if (playerUI != null)
+        {
+            playerUI.UpdateHealthBar(health);
+        }
+
+        if (gameCanvas != null)
+        {
+            canvasRect = gameCanvas.GetComponent<RectTransform>();
+        }
     }
 
     private void Update()
     {
-        HandleInput();
-    }
-
-    private void FixedUpdate()
-    {
-        Move();
-        ConstrainToScreen();
-    }
-
-    private void HandleInput()
-    {
+        // Capture input for horizontal and vertical axes
         movement.x = Input.GetAxis("Horizontal");
         movement.y = Input.GetAxis("Vertical");
     }
 
-    private void Move()
+    private void FixedUpdate()
     {
-        rb.velocity = movement * speed;
+        // Actual movement in physics step
+        Move(movement);
+        ConstrainToScreen();
+    }
+
+    /// <summary>
+    /// Implementation of IMovable interface. Moves the player using a Rigidbody2D.
+    /// </summary>
+    public void Move(Vector2 direction)
+    {
+        rb.velocity = direction * speed;
     }
 
     private void ConstrainToScreen()
-    {
-        Vector3 position = transform.position;
-        Vector3 screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
+{
+    // Grab the player's current position
+    Vector3 position = transform.position;
+    Camera mainCamera = Camera.main;
 
-        position.x = Mathf.Clamp(position.x, -screenBounds.x + 0.5f, screenBounds.x - 0.5f);
-        position.y = Mathf.Clamp(position.y, -screenBounds.y + 0.5f, screenBounds.y - 2);
+    // Convert screen coordinates to world coordinates 
+    // at the max screen width/height
+    Vector3 screenBounds = mainCamera.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
 
-        transform.position = position;
-    }
+    // Clamp the player's X within the screen edges (with a small buffer)
+    position.x = Mathf.Clamp(position.x, -screenBounds.x + 0.5f, screenBounds.x - 0.5f);
 
-    public override void UpdateState() { }
+    // Clamp the player's Y within the screen edges (with a small buffer)
+    position.y = Mathf.Clamp(position.y, -screenBounds.y + 0.5f, screenBounds.y - 2f);
 
+    // Reassign the clamped position back to the player
+    transform.position = position;
+}
+
+
+    /// <summary>
+    /// Implementation of IDamageable interface. Reduces health.
+    /// Negative damage effectively heals the player.
+    /// </summary>
     public void TakeDamage(int damage)
     {
         health -= damage;
-        health = Mathf.Clamp(health, 0, 100);
-        UpdateHealthBar();
+        health = Mathf.Clamp(health, 0, maxHealth);
+
+        if (playerUI != null)
+        {
+            playerUI.UpdateHealthBar(health);
+        }
 
         if (health <= 0)
         {
@@ -68,39 +108,21 @@ public class Player : GameEntity
         }
     }
 
-    public void Heal(int amount)
+    /// <summary>
+    /// Implementation of IPowerUpReceiver interface. 
+    /// Applies a power-up to this player instance.
+    /// </summary>
+    public void ApplyPowerUp(BasePowerUp powerUp)
     {
-        health += amount;
-        health = Mathf.Clamp(health, 0, 100);
-        UpdateHealthBar();
+        powerUp.ApplyEffect(this);
     }
 
-    public void BoostSpeed(float multiplier, float duration)
+    /// <summary>
+    /// The UpdateState method from GameEntity.
+    /// Not used directly here, but required as an abstract method.
+    /// </summary>
+    public override void UpdateState()
     {
-        if (isSpeedBoostActive) return;
-
-        isSpeedBoostActive = true;
-        speed *= multiplier;
-        StartCoroutine(ResetSpeedAfterDelay(duration));
-    }
-
-    private IEnumerator ResetSpeedAfterDelay(float delay)
-    {
-        yield return new WaitForSeconds(delay);
-        ResetSpeed();
-    }
-
-    private void ResetSpeed()
-    {
-        speed = initialSpeed;
-        isSpeedBoostActive = false;
-    }
-
-    private void UpdateHealthBar()
-    {
-        if (healthBarImage != null)
-        {
-            healthBarImage.fillAmount = health / 100f;
-        }
+        // Could handle any extra, per-frame state updates if needed.
     }
 }

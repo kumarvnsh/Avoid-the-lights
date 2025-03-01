@@ -1,55 +1,44 @@
 using UnityEngine;
 
+/// <summary>
+/// Controls an enemy light that follows the player after a delay.
+/// </summary>
 public class LightSource : MonoBehaviour
 {
-    [SerializeField] private float speed; // Movement speed of the light source
-    [SerializeField] private float avoidanceRadius = 1.5f; // Radius for avoiding overlaps
+    [Header("Light Movement")]
+    [SerializeField] private float speed;
+    [SerializeField] private float delayBeforeFollow = 3f;
+
     private Transform player;
     private bool isFollowingPlayer = false;
-    private Transform cacheTransform;
+
     private void Start()
     {
-        // Set random speed between 2 and 4
+        // Randomize the speed for variety
         speed = Random.Range(2f, 3.5f);
 
-        // Find the player in the scene
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-        cacheTransform = transform;
+        // Find the player object by tag
+        var playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            player = playerObj.transform;
+        }
 
-        // Start following the player after a delay
-        Invoke(nameof(StartFollowingPlayer), 3f);
+        // Start following after a specified delay
+        Invoke(nameof(StartFollowingPlayer), delayBeforeFollow);
     }
 
     private void Update()
     {
         if (player != null && isFollowingPlayer)
         {
-            MoveTowardPlayerWithAvoidance();
+            // Move directly toward player's position
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                player.position,
+                speed * Time.deltaTime
+            );
         }
-    }
-
-    private void MoveTowardPlayerWithAvoidance()
-    {
-        Vector3 directionToPlayer = (player.position - cacheTransform.position).normalized;
-        Vector3 avoidanceDirection = Vector3.zero;
-       
-
-        // Find nearby lights to avoid clustering
-        Collider2D[] nearbyLights = Physics2D.OverlapCircleAll(cacheTransform.position, avoidanceRadius);
-        foreach (var collider in nearbyLights)
-        {
-            if (collider.gameObject != gameObject && collider.CompareTag("LightSource"))
-            {
-                Vector3 directionAwayFromLight = (cacheTransform.position - collider.transform.position).normalized;
-                avoidanceDirection += directionAwayFromLight;
-            }
-        }
-
-        // Combine direction to player with avoidance direction
-        Vector3 finalDirection = (directionToPlayer + avoidanceDirection).normalized;
-
-        // Move the light source
-        cacheTransform.position += finalDirection * speed * Time.deltaTime;
     }
 
     private void StartFollowingPlayer()
@@ -59,21 +48,28 @@ public class LightSource : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // Check if it collided with the player
         if (other.CompareTag("Player"))
         {
-            // Deal damage to the player on contact
-            Player playerScript = other.GetComponent<Player>();
-            if (playerScript != null)
+            // If so, apply damage to the player
+            var damageable = other.GetComponent<IDamageable>();
+            if (damageable != null)
             {
-                playerScript.TakeDamage(5); // Adjust damage as needed
+                damageable.TakeDamage(5);
             }
         }
     }
 
-    private void OnDrawGizmosSelected()
+    private void OnTriggerStay2D(Collider2D collision)
     {
-        // Visualize the avoidance radius for debugging
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(cacheTransform.position, avoidanceRadius);
+        if (collision.CompareTag("Player"))
+        {
+            // If the light is still colliding with the player, keep applying damage
+            var damageable = collision.GetComponent<IDamageable>();
+            if (damageable != null)
+            {
+                damageable.TakeDamage(1);
+            }
+        }
     }
 }

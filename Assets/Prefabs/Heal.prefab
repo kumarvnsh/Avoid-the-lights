@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 5179085679861193736}
   - component: {fileID: 7118925614649693036}
   - component: {fileID: 4759824101067841176}
-  - component: {fileID: 2234235212504513833}
+  - component: {fileID: 3824717101871030573}
   m_Layer: 0
   m_Name: Heal
   m_TagString: Untagged
@@ -121,7 +121,7 @@ CircleCollider2D:
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
   m_Radius: 2.56
---- !u!114 &2234235212504513833
+--- !u!114 &3824717101871030573
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -130,10 +130,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 4591298803844625174}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 61b957255045edc4ea47b2b3d9e1132c, type: 3}
+  m_Script: {fileID: 11500000, guid: c7eeb6e0e0a4cf447af558771a815957, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  effect: Heal
-  value: 10
-  speedMultiplier: 2
-  duration: 5
+  healAmount: 20

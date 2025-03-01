@@ -1,43 +1,54 @@
 using UnityEngine;
-using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
+/// <summary>
+/// Handles the main menu, including starting the game, showing 
+/// level selection, and quitting.
+/// </summary>
 public class MainMenuManager : MonoBehaviour
 {
-    [SerializeField] private GameObject levelSelectionPanel; // Panel for level selection
+    [Header("Level Selection Panel")]
+    [SerializeField] private GameObject levelSelectionPanel;
 
     private void Start()
     {
-        // Ensure the level selection panel is hidden on start
+        // Hide level selection panel if it exists
         if (levelSelectionPanel != null)
+        {
             levelSelectionPanel.SetActive(false);
-
-            
+        }
     }
 
-    // Function to handle the Start button click
+    /// <summary>
+    /// Shows the level selection panel.
+    /// </summary>
     public void OnStartButtonClick()
     {
         if (levelSelectionPanel != null)
         {
-            levelSelectionPanel.SetActive(true); // Show the level selection panel
+            levelSelectionPanel.SetActive(true);
         }
     }
 
+    /// <summary>
+    /// Hides the level selection panel (back button).
+    /// </summary>
     public void OnBackButtonClick()
     {
         if (levelSelectionPanel != null)
         {
-            levelSelectionPanel.SetActive(false); // Show the level selection panel
+            levelSelectionPanel.SetActive(false);
         }
     }
 
-    // Function to handle level selection
+    /// <summary>
+    /// Loads a level/scene by name.
+    /// </summary>
     public void LoadLevel(string sceneName)
     {
         if (!string.IsNullOrEmpty(sceneName))
         {
-            SceneManager.LoadScene(sceneName); // Load the scene by name
+            SceneManager.LoadScene(sceneName);
         }
         else
         {
@@ -45,7 +56,9 @@ public class MainMenuManager : MonoBehaviour
         }
     }
 
-    // Function to quit the application
+    /// <summary>
+    /// Quits the application.
+    /// </summary>
     public void QuitGame()
     {
         Debug.Log("Quitting the game...");

@@ -1,70 +1,80 @@
 using UnityEngine;
 using UnityEngine.UI;
 
+/// <summary>
+/// Moves a UI light element randomly around the screen,
+/// changing its alpha over time.
+/// </summary>
+[RequireComponent(typeof(RectTransform))]
 public class LightMover : MonoBehaviour
 {
-    private RectTransform lightElement; // The RectTransform of the UI element
-    public Canvas canvas;              // Assign the canvas to keep movement within bounds
-    public float moveSpeed = 100f;     // Speed of movement
-    public float alphaChangeSpeed = 2f; // Speed of alpha change
+    [Header("References")]
+    public Canvas canvas;            // Canvas for boundary reference
+    private RectTransform lightElement;
+    private Image lightImage;
 
+    [Header("Movement Settings")]
+    public float moveSpeed = 100f;
     private Vector2 randomTargetPosition;
+
+    [Header("Alpha Settings")]
+    public float alphaChangeSpeed = 2f;
     private float currentAlpha = 1f;
     private float targetAlpha;
-    private Image lightImage;
 
     private void Start()
     {
         lightElement = GetComponent<RectTransform>();
+        lightImage = GetComponent<Image>();
 
-        if (lightElement == null || canvas == null)
+        if (!lightElement || !canvas || !lightImage)
         {
-            Debug.LogError("UI Element or Canvas is not assigned properly!");
+            Debug.LogError("LightMover: Missing required components (RectTransform, Canvas, Image).");
             return;
         }
 
-        // Initialize random position and alpha
+        // Initialize random target values
         SetRandomTargetPosition();
         targetAlpha = Random.Range(0.2f, 1f);
-
-        lightImage = GetComponent<Image>();
-        if (lightImage == null)
-        {
-            Debug.LogError("The UI Element does not have an Image component!");
-        }
     }
 
     private void Update()
     {
-        if (lightElement == null || canvas == null || lightImage == null) return;
+        if (!lightElement || !canvas || !lightImage) return;
 
-        // Move towards the random target position
+        // Move toward the random target position
         Vector2 currentPosition = lightElement.anchoredPosition;
-        lightElement.anchoredPosition = Vector2.MoveTowards(currentPosition, randomTargetPosition, moveSpeed * Time.deltaTime);
+        lightElement.anchoredPosition = Vector2.MoveTowards(
+            currentPosition,
+            randomTargetPosition,
+            moveSpeed * Time.deltaTime
+        );
 
-        // Change alpha towards the target alpha
+        // Change alpha toward the target alpha
         currentAlpha = Mathf.MoveTowards(currentAlpha, targetAlpha, alphaChangeSpeed * Time.deltaTime);
         Color currentColor = lightImage.color;
         currentColor.a = currentAlpha;
         lightImage.color = currentColor;
 
-        // If the UI element reaches the random target position, set a new target
+        // If the UI element reaches the random target, pick a new target
         if (Vector2.Distance(currentPosition, randomTargetPosition) < 1f)
         {
             SetRandomTargetPosition();
         }
 
-        // If the current alpha reaches the target alpha, set a new random target alph
+        // If the alpha is near the target, pick a new alpha
         if (Mathf.Abs(currentAlpha - targetAlpha) < 0.01f)
         {
             targetAlpha = Random.Range(0.2f, 1f);
         }
     }
 
+    /// <summary>
+    /// Sets a random target position within the canvas.
+    /// </summary>
     private void SetRandomTargetPosition()
     {
         RectTransform canvasRect = canvas.GetComponent<RectTransform>();
-
         float xMin = canvasRect.rect.xMin;
         float xMax = canvasRect.rect.xMax;
         float yMin = canvasRect.rect.yMin;
